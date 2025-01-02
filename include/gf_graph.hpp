@@ -4,3 +4,4 @@
 #define DISABLE_WARN
 
 #include "interact_graph.hpp"
+#include "louvain.hpp"
