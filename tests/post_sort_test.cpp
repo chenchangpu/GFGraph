@@ -1,5 +1,6 @@
 #include "gf_graph.hpp"
 
+using namespace gf_graph;
 
 int main() {
     // InteractGraph g("../datasets/test_account.json", 

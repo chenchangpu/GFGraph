@@ -21,8 +21,17 @@
 #include "str.hpp"
 #include "log.hpp"
 
+namespace gf_graph {
+
 using vid_t = int32_t;
 using eid_t = int32_t;
+
+template <typename K, typename V>
+using hashmap = phmap::flat_hash_map<K, V>;
+template <typename K>
+using hashset = phmap::flat_hash_set<K>;
+
+using json = nlohmann::json;
 
 enum class topk_label_t {
     // 发帖数量
@@ -41,12 +50,8 @@ enum class topk_label_t {
 
 class InteractGraph {
 public:
-    template <typename K, typename V>
-    using hashmap = phmap::flat_hash_map<K, V>;
-    template <typename K>
-    using hashset = phmap::flat_hash_set<K>;
-
-    using json = nlohmann::json;
+    // each directed edge between two accounts, with interactions of posts [post-index,...]
+    using acc_edata_t = std::vector<vid_t>;
 
     InteractGraph() = default;
 
@@ -55,6 +60,40 @@ public:
         AddAccounts(account_path, replace);
         AddPosts(post_path, replace);
         AddInteractions(interact_path, replace);
+    }
+
+    vid_t num_accounts() const {
+        return account2idx_map_.size();
+    }
+
+    vid_t num_posts() const {
+        return post2idx_map_.size();
+    }
+
+    eid_t num_interactions() const {
+        return interact_map_.size();
+    }
+
+    std::string idx2account(vid_t uidx) const {
+        auto it = idx2account_map_.find(uidx);
+        if (it == idx2account_map_.end()) {
+            return {};
+        }
+        return it->second->userId;
+    }
+
+
+    std::string idx2post(vid_t post_idx) const {
+        auto it = idx2post_map_.find(post_idx);
+        if (it == idx2post_map_.end()) {
+            return {};
+        }
+        return it->second->post_id;       
+    }
+
+
+    const std::vector<hashmap<vid_t, acc_edata_t>>& account_graph() const {
+        return account_graph_;
     }
 
     void AddAccounts(const std::string& account_path, bool replace = true) {
@@ -540,8 +579,8 @@ public:
     // interactions(forward/quote/comment) of the post (post-index -> [interact_id, ...])
     std::vector<std::vector<std::string>> post_interactions_;
 
-    // each directed edge between two accounts, with interactions of posts [post-index,...]
-    using acc_edata_t = std::vector<vid_t>;
     // account graph with interactions of posts ( account-index -> (account-index -> acc_edata_t) )
     std::vector<hashmap<vid_t, acc_edata_t>> account_graph_;
 };
+
+}   // namespace gf_graph

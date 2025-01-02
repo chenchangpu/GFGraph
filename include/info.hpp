@@ -3,6 +3,8 @@
 
 #include "nlohmann/json.hpp"
 
+namespace gf_graph {
+
 struct AccountInfo {
     std::string userId;
     // std::string screenName;
@@ -106,3 +108,5 @@ struct InteractInfo {
 //     int forward_count;
 //     int view_count;
 // };
+
+}   // namespace gf_graph

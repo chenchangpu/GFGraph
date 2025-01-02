@@ -4,6 +4,7 @@
 #include "str.hpp"
 
 using namespace std;
+using namespace gf_graph;
 
 int main(int argc, char *argv[]) {
     {    
