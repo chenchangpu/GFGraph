@@ -11,7 +11,7 @@
 #include <thrust/sequence.h>
 #include <thrust/transform.h>
 #include <thrust/for_each.h>
-
+#include <thrust/sort.h>
 
 #include "nlohmann/json.hpp"
 #include "parallel_hashmap/phmap.h"
@@ -287,6 +287,11 @@ public:
     }
 
 
+    std::array<std::string, 3>
+    GetOldestPost(const std::string& start_time, const std::string& end_time) const {
+        return GetOldestPost(DateTime(start_time), DateTime(end_time));
+    }
+
     // get the oldest post and its userId from datetime [start_time, end_time] (both including)
     std::array<std::string, 3>
     GetOldestPost(const DateTime& start_time = MIN_DATETIME, const DateTime& end_time = MAX_DATETIME) const {
@@ -315,12 +320,13 @@ public:
         if (oldest_post_id.empty()) {
             return {};
         }
-        return { oldest_uid, oldest_post_id, oldest_datetime.ToString() };
+        return { oldest_post_id, oldest_datetime.ToString(), oldest_uid };
     }
 
     std::pair<std::vector<std::string>, std::vector<int>>
-    PostsSortByFreq(const TimeRange& interval = TIMERANGE_DAY, 
-                    const DateTime& start_time = MIN_DATETIME, const DateTime& end_time = MAX_DATETIME) const {
+    PostsByFreq(const TimeRange& interval = TIMERANGE_DAY, 
+                const DateTime& start_time = MIN_DATETIME, const DateTime& end_time = MAX_DATETIME,
+                bool sorted = true) const {
         auto interval_secs = interval.seconds;
         assert(interval.seconds > 0);
         
@@ -358,8 +364,12 @@ public:
             indices.push_back(id);
             counts.push_back(cnt);
         }
-        thrust::sort_by_key(thrust::omp::par, counts.begin(), counts.end(), 
-            indices.begin(), thrust::greater<int>());  
+
+        if (sorted) { 
+            thrust::sort_by_key(thrust::omp::par, counts.begin(), counts.end(), 
+                indices.begin(), thrust::greater<int>());  
+        }
+
         std::vector<std::string> dates(sz);
         thrust::transform(thrust::omp::par, indices.begin(), indices.end(),
             dates.begin(), [base_secs, interval_secs](const int& offsets) {
@@ -370,9 +380,10 @@ public:
     }
 
     std::pair<std::vector<std::string>, std::vector<int>>
-    PostsSortByFreq(const TimeRange& interval, 
-                    const std::string& start_time, const std::string& end_time) const {
-        return PostsSortByFreq(interval, DateTime(start_time), DateTime(end_time));
+    PostsByFreq(const TimeRange& interval, 
+                const std::string& start_time, const std::string& end_time,
+                bool sorted = true) const {
+        return PostsByFreq(interval, DateTime(start_time), DateTime(end_time), sorted);
     }
 
 

@@ -9,12 +9,17 @@ int main() {
 
     InteractGraph g("../datasets/accountInfo.json", "../datasets/postInfo.json", "../datasets/interactInfo.json");
 
-    printx("The graph has loaded");
+    // printx("The graph has loaded");
 
     auto result = LouvainCommunity(g);
-    printx("louvain_communitys: ", VecToString(result, [](const auto& vec) {
-        return VecToString(vec);
-    }));
+
+    printx("num_communitys: ", result.size());
+
+    constexpr int NUM = 5;
+    for (int i = 0; i < std::min<int>(NUM, result.size()); ++i) {
+        printx("community-", i, " size=", result[i].size(), 
+            ", members=", VecToString(result[i], ToString<std::string>, 10));
+    }
 
     return 0;
 }

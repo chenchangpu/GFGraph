@@ -8,7 +8,7 @@
 namespace gf_graph {
 
 std::vector<std::vector<std::string>> 
-LouvainCommunity(const InteractGraph& g) {
+LouvainCommunity(const InteractGraph& g, bool sorted = true) {
     louvain::DiGraph<vid_t, louvain::None, float> x;
     vid_t num_vertices = g.num_accounts();
     LOG_DEBUG("num_vertices: ", num_vertices);
@@ -46,6 +46,13 @@ LouvainCommunity(const InteractGraph& g) {
             vec.push_back(g.idx2account(uidx));
         }
         result.push_back(vec);
+    }
+
+    if (sorted) {
+        thrust::sort(thrust::omp::par, result.begin(), result.end(), 
+            [](const auto& lhs, const auto& rhs) {
+                return lhs.size() > rhs.size();
+            });
     }
 
     return result;

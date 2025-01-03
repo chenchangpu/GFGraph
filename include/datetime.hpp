@@ -88,10 +88,10 @@ struct DateTime {
         if (iss >> year >> dash1 >> month >> dash2 >> day >> 
             hour >> colon1 >> minute >> colon2 >> second) {
             if (dash1!= '-' || dash2!= '-' || colon1!= ':' || colon2!= ':') {
-                throw std::invalid_argument("Invalid time string format");
+                throw std::invalid_argument("Invalid time string format, should be YYYY-MM-DD hh:mm:ss");
             }
         } else {
-            throw std::invalid_argument("Invalid time string format");
+            throw std::invalid_argument("Invalid time string format, should be YYYY-MM-DD hh:mm:ss");
         }
         validate();
     }
