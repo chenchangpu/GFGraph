@@ -7,11 +7,11 @@ set(Thrust_DIR "./third_party/thrust/cmake/")
 find_package(OpenMP REQUIRED)
 find_package(Thrust REQUIRED CONFIG)
 
+set(pybind11_DIR "/mnt/sevenT/changpuc/anaconda3/lib/python3.12/site-packages/pybind11/share/cmake/pybind11")
+find_package(pybind11 REQUIRED)  # 添加 pybind11 依赖
 
 set(CMAKE_CXX_STANDARD 17)
 
-#set(CMAKE_BUILD_TYPE DEBUG)
-#set(CMAKE_BUILD_TYPE RELEASE)
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif()
@@ -29,3 +29,7 @@ thrust_create_target(ThrustOMP HOST CPP DEVICE OMP)
 link_libraries(ThrustOMP)
 
 add_subdirectory(tests)
+
+# 添加 Python 模块
+pybind11_add_module(pyGFGraph src/pyGFGraph.cpp)  # 新增 Python 接口源文件
+target_link_libraries(pyGFGraph PRIVATE OpenMP::OpenMP_CXX ThrustOMP)

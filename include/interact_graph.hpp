@@ -249,6 +249,18 @@ public:
         return results;
     }
 
+    // GetTopKAccount重载
+    std::vector<std::pair<std::string, int>> 
+    GetTopkAccounts(vid_t topk, int label) const{
+        assert(label < 6 && label >= 0);
+        if(label == 0) return GetTopkAccounts(topk, topk_label_t::POSTS);
+        if(label == 1) return GetTopkAccounts(topk, topk_label_t::INTERACTED_TIMES);
+        if(label == 2) return GetTopkAccounts(topk, topk_label_t::INTERACTED_ACCOUNTS);
+        if(label == 3) return GetTopkAccounts(topk, topk_label_t::INTERACTING_TIMES);
+        if(label == 4) return GetTopkAccounts(topk, topk_label_t::INTERACTING_POSTS);
+        if(label == 5) return GetTopkAccounts(topk, topk_label_t::INTERACTING_ACCOUNTS);
+    }
+
     std::vector<std::string> GetCommonInteractingAccounts(const std::vector<std::string>& userIds) const {
         std::vector<vid_t> uidxs;
         for (const std::string& uid: userIds) {
@@ -384,6 +396,21 @@ public:
                 const std::string& start_time, const std::string& end_time,
                 bool sorted = true) const {
         return PostsByFreq(interval, DateTime(start_time), DateTime(end_time), sorted);
+    }
+
+    // 重载第一个参数int/uint64_t型输入 -> 转换为 TimeRange类型
+    std::pair<std::vector<std::string>, std::vector<int>>
+    PostsByFreq(const uint64_t& interval, 
+                const DateTime& start_time = MIN_DATETIME, const DateTime& end_time = MAX_DATETIME,
+                bool sorted = true) const{
+        return PostsByFreq(TimeRange(interval), start_time, end_time, sorted);
+    }
+
+    std::pair<std::vector<std::string>, std::vector<int>>
+    PostsByFreq(const uint64_t& interval, 
+                const std::string& start_time, const std::string& end_time,
+                bool sorted = true) const {
+        return PostsByFreq(TimeRange(interval), DateTime(start_time), DateTime(end_time), sorted);
     }
 
 
