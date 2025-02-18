@@ -7,8 +7,19 @@ set(Thrust_DIR "./third_party/thrust/cmake/")
 find_package(OpenMP REQUIRED)
 find_package(Thrust REQUIRED CONFIG)
 
-set(pybind11_DIR "/mnt/sevenT/changpuc/anaconda3/lib/python3.12/site-packages/pybind11/share/cmake/pybind11")
-find_package(pybind11 REQUIRED)  # 添加 pybind11 依赖
+# 设置pybind11的路径
+set(PYBIND11_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/third_party/pybind11)
+set(PYBIND11_INCLUDE_DIR ${PYBIND11_ROOT}/include)
+
+# 添加pybind11的CMake模块路径
+list(APPEND CMAKE_MODULE_PATH "${PYBIND11_ROOT}/tools")
+
+# 包含pybind11
+include_directories(${PYBIND11_INCLUDE_DIR})
+find_package(pybind11 CONFIG PATHS ${PYBIND11_ROOT} NO_DEFAULT_PATH)
+if(NOT pybind11_FOUND)
+    add_subdirectory(${PYBIND11_ROOT})
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 
